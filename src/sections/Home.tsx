@@ -3,7 +3,7 @@ import { Calendar } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { QRCodeSVG } from 'qrcode.react'
 
-const SITE_URL = 'https://algebra-lineal-pascual.vercel.app/'
+const SITE_URL = 'https://curso-algebra-lineal.vercel.app/'
 
 export function Home() {
   return (
