@@ -1,0 +1,91 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ---------------------------------------------------------
+   Design tokens — Brilliant.org inspired palette
+   "Pear" Green: #D6F523
+   Deep Navy: #0B162C
+   Clean Backgrounds: #F7F9FA, #FFFFFF
+   Primary Blue: #2050DF
+---------------------------------------------------------- */
+@layer base {
+  :root {
+    --bg: #0b162c;
+    --surface: #142240;
+    --surface-raised: #1f3054;
+    --ink: #f7f9fa;
+    --ink-muted: #a3adc2;
+    --accent: #4a77ff;
+    --accent-ink: #ffffff;
+    --accent-warm: #ff7878;
+    --accent-warm-ink: #ffffff;
+    --accent-green: #d6f523;
+    --accent-green-ink: #0b162c;
+    --accent-orange: #ffb433;
+    --accent-orange-ink: #0b162c;
+    --line: #293859;
+    --line-strong: #3b4e78;
+    --danger: #ff7878;
+    --success: #3be665;
+
+    --font-display: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+    /* shadcn/ui mapping (HSL) so shipped components stay in-palette */
+    --background: 220 60% 11%;
+    --foreground: 210 16% 96%;
+    --card: 220 52% 16%;
+    --card-foreground: 210 16% 96%;
+    --popover: 220 52% 16%;
+    --popover-foreground: 210 16% 96%;
+    --primary: 225 100% 65%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 70 90% 55%;
+    --secondary-foreground: 220 60% 11%;
+    --muted: 220 52% 16%;
+    --muted-foreground: 218 20% 70%;
+    --accent-hsl: 225 100% 65%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 100% 74%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 222 36% 25%;
+    --input: 222 36% 25%;
+    --ring: 225 100% 65%;
+    --radius: 1rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    background-color: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+  }
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    text-wrap: balance;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  .font-mono-nums {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
