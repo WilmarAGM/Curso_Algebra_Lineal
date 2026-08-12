@@ -10,7 +10,7 @@ interface SideBarProps {
   onNavigate: (id: PageId) => void
 }
 
-const NAV_ITEMS = [
+export const NAV_ITEMS = [
   { id: 'inicio', label: 'Inicio', icon: Home },
   { id: 'semanas', label: 'Semanas', icon: CalendarDays },
   { id: 'material', label: 'Material de apoyo', icon: BookOpen },
@@ -18,20 +18,52 @@ const NAV_ITEMS = [
   { id: 'paap', label: 'PAAP', icon: Users },
 ] as const
 
+export function BrandMark() {
+  return (
+    <div className="flex items-center gap-2">
+      <span className="h-8 w-8 shrink-0 rounded-lg bg-gradient-to-br from-leaf to-pine flex items-center justify-center font-display font-bold text-ink shadow-[0_0_15px_rgba(214,245,35,0.4)]">
+        AL
+      </span>
+      <h1 className="font-display text-lg leading-tight text-ink font-bold drop-shadow-[0_0_5px_rgba(255,255,255,0.2)]">
+        Álgebra <br /> Lineal
+      </h1>
+    </div>
+  )
+}
+
+export function NavList({ active, onNavigate }: SideBarProps) {
+  return (
+    <nav className="flex flex-col gap-2 flex-1">
+      {NAV_ITEMS.map((item) => {
+        const isActive = active === item.id
+        const Icon = item.icon
+        return (
+          <button
+            key={item.id}
+            onClick={() => onNavigate(item.id)}
+            className={cn(
+              'flex items-center gap-3 rounded-lg px-4 py-3 text-sm transition-all duration-300',
+              isActive
+                ? 'bg-leaf/10 text-leaf font-bold shadow-[inset_4px_0_0_0_rgba(214,245,35,1),0_0_20px_rgba(214,245,35,0.2)] border border-leaf/20'
+                : 'text-ink-muted hover:bg-line/40 hover:text-ink',
+            )}
+          >
+            <Icon className={cn('h-5 w-5', isActive ? 'text-leaf drop-shadow-[0_0_8px_rgba(214,245,35,0.8)]' : 'text-ink-muted')} />
+            {item.label}
+          </button>
+        )
+      })}
+    </nav>
+  )
+}
+
 export function SideBar({ active, onNavigate }: SideBarProps) {
   return (
     <aside className="fixed inset-y-0 left-0 z-50 w-72 flex-col border-r border-line bg-surface/80 backdrop-blur hidden md:flex">
       <div className="flex flex-col flex-1 px-5 py-8">
         <div className="mb-10">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="h-8 w-8 rounded-lg bg-gradient-to-br from-leaf to-pine flex items-center justify-center font-display font-bold text-ink shadow-[0_0_15px_rgba(214,245,35,0.4)]">
-              AL
-            </span>
-            <h1 className="font-display text-lg leading-tight text-ink font-bold drop-shadow-[0_0_5px_rgba(255,255,255,0.2)]">
-              Álgebra <br /> Lineal
-            </h1>
-          </div>
-          <p className="text-xs text-ink-muted leading-tight">
+          <BrandMark />
+          <p className="mt-2 text-xs text-ink-muted leading-tight">
             Institución Universitaria Pascual Bravo
           </p>
         </div>
@@ -41,27 +73,7 @@ export function SideBar({ active, onNavigate }: SideBarProps) {
           <span>Iniciar sesión</span>
         </button>
 
-        <nav className="flex flex-col gap-2 flex-1">
-          {NAV_ITEMS.map((item) => {
-            const isActive = active === item.id
-            const Icon = item.icon
-            return (
-              <button
-                key={item.id}
-                onClick={() => onNavigate(item.id)}
-                className={cn(
-                  'flex items-center gap-3 rounded-lg px-4 py-3 text-sm transition-all duration-300',
-                  isActive
-                    ? 'bg-leaf/10 text-leaf font-bold shadow-[inset_4px_0_0_0_rgba(214,245,35,1),0_0_20px_rgba(214,245,35,0.2)] border border-leaf/20'
-                    : 'text-ink-muted hover:bg-line/40 hover:text-ink',
-                )}
-              >
-                <Icon className={cn('h-5 w-5', isActive ? 'text-leaf drop-shadow-[0_0_8px_rgba(214,245,35,0.8)]' : 'text-ink-muted')} />
-                {item.label}
-              </button>
-            )
-          })}
-        </nav>
+        <NavList active={active} onNavigate={onNavigate} />
 
         <div className="mt-auto pt-6">
           <a

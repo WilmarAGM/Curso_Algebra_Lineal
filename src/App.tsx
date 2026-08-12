@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { SideBar, type PageId } from '@/components/app/SideBar'
+import { MobileNav } from '@/components/app/MobileNav'
 import { Home } from '@/sections/Home'
 import { WeeksGrid } from '@/sections/WeeksGrid'
 import { SupportMaterial } from '@/sections/SupportMaterial'
@@ -32,11 +33,12 @@ function App() {
       <div className="pointer-events-none fixed top-1/3 -right-40 h-[600px] w-[600px] rounded-full bg-ember/20 blur-[150px]" />
       <div className="pointer-events-none fixed -bottom-40 left-1/4 h-[400px] w-[400px] rounded-full bg-pine/20 blur-[100px]" />
 
-      {/* SideBar for Desktop - For mobile, a hamburger menu would be added here */}
+      {/* SideBar for Desktop */}
       <SideBar active={page as PageId} onNavigate={navigate as (id: PageId) => void} />
 
       {/* Main Content Area - padded left by the sidebar width (w-72 = 18rem = 288px) on desktop */}
-      <main className="flex-1 md:ml-72 min-h-screen flex flex-col">
+      <main className="flex-1 min-w-0 md:ml-72 min-h-screen flex flex-col">
+        <MobileNav active={page as PageId} onNavigate={navigate as (id: PageId) => void} />
         <div className="flex-1">
           {page === 'inicio' && <Home />}
           {page === 'semanas' && <WeeksGrid onNavigate={navigate} />}
