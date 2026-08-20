@@ -327,19 +327,328 @@ export const ROUCHE_COMPREHENSION: NumericCheck[] = [
 ]
 
 // ---- Módulo 07: Taller de consolidación ----
-export const TALLER_MATRIX_M = [
-  [1, 2, -1, 3],
-  [-2, -4, 4, -10],
-  [3, 6, -5, 13],
+
+// Bloque 1: escribir la matriz aumentada
+export interface Taller1AugmentedItem {
+  system: string[]
+  note?: string
+  rows: number[][]
+}
+
+export const TALLER1_AUGMENTED_ITEMS: Taller1AugmentedItem[] = [
+  {
+    system: ['2x + 3y = 7', '4x − y = 1'],
+    rows: [
+      [2, 3, 7],
+      [4, -1, 1],
+    ],
+  },
+  {
+    system: ['x − y + 2z = 5', '3x + z = −1', '−2x + 4y − z = 0'],
+    note: 'La segunda ecuación no tiene término en y — su coeficiente es 0, la columna no se omite.',
+    rows: [
+      [1, -1, 2, 5],
+      [3, 0, 1, -1],
+      [-2, 4, -1, 0],
+    ],
+  },
+  {
+    system: ['x₁ + 2x₂ − x₃ = 4', '−x₁ + x₂ + 3x₃ = −2'],
+    note: 'Sistema subdeterminado: la matriz aumentada no es cuadrada.',
+    rows: [
+      [1, 2, -1, 4],
+      [-1, 1, 3, -2],
+    ],
+  },
+  {
+    system: ['3x − y = 5', '−x + 2y = 1', '4x + y = 9'],
+    note: 'Sistema sobredeterminado: más ecuaciones que incógnitas.',
+    rows: [
+      [3, -1, 5],
+      [-1, 2, 1],
+      [4, 1, 9],
+    ],
+  },
 ]
 
-export const TRAFFIC_FLOWS = {
-  inflows: [
-    { node: 'A', value: 500 },
-    { node: 'D', value: 200 },
-  ],
-  outflows: [
-    { node: 'B', value: 300 },
-    { node: 'C', value: 400 },
-  ],
+// Bloque 2: identificar el tipo de matriz (mismo formato del módulo de teoría, matrices nuevas)
+export const TALLER1_MATRIX_CLASSIFY_ITEMS: MatrixClassifyItem[] = [
+  {
+    rows: [
+      [1, 0],
+      [0, 1],
+    ],
+    kind: 'identidad',
+    explain: 'Diagonal con unos en toda la diagonal principal: es la Identidad I₂.',
+  },
+  {
+    rows: [
+      [7, 0, 0],
+      [0, -1, 0],
+      [0, 0, 4],
+    ],
+    kind: 'diagonal',
+    explain: 'Ceros fuera de la diagonal, pero no todos los elementos de la diagonal son 1.',
+  },
+  {
+    rows: [
+      [2, 1, -3],
+      [0, -4, 5],
+      [0, 0, 1],
+    ],
+    kind: 'triSup',
+    explain: 'Ceros debajo de la diagonal principal: es Triangular Superior.',
+  },
+  {
+    rows: [
+      [5, 0, 0],
+      [-2, 3, 0],
+      [1, 4, -6],
+    ],
+    kind: 'triInf',
+    explain: 'Ceros encima de la diagonal principal: es Triangular Inferior.',
+  },
+  {
+    rows: [
+      [4, -1, 0],
+      [-1, 3, 2],
+      [0, 2, 5],
+    ],
+    kind: 'simetrica',
+    explain: 'A = Aᵀ: a₁₂=a₂₁=−1, a₁₃=a₃₁=0, a₂₃=a₃₂=2; no es diagonal ni triangular.',
+  },
+  {
+    rows: [
+      [0, 2, 1],
+      [5, 0, 3],
+      [-1, 4, 0],
+    ],
+    kind: 'ninguna',
+    explain: 'No es simétrica (a₁₂=2 ≠ a₂₁=5) ni triangular.',
+  },
+]
+
+// Bloque 3: secuencias de operaciones elementales de fila
+export interface Taller1RowOpSeqItem {
+  rows: number[][]
+  augCol?: number
+  ops: string[]
+  finalRows: number[][]
+  checkPos: [number, number]
+  checkAnswer: number
 }
+
+export const TALLER1_ROWOP_SEQ: Taller1RowOpSeqItem[] = [
+  {
+    rows: [
+      [2, 4, -2],
+      [1, 3, 1],
+      [-1, 2, 5],
+    ],
+    ops: ['R₁ ← ½R₁', 'R₂ ← R₂ − R₁', 'R₁ ↔ R₃'],
+    finalRows: [
+      [-1, 2, 5],
+      [0, 1, 2],
+      [1, 2, -1],
+    ],
+    checkPos: [1, 1],
+    checkAnswer: -1,
+  },
+  {
+    rows: [
+      [1, -1, 2, 4],
+      [3, 0, -1, 5],
+      [-2, 4, 1, -3],
+    ],
+    augCol: 3,
+    ops: ['R₂ ← R₂ − 3R₁', 'R₃ ← R₃ + 2R₁', 'R₂ ↔ R₃', 'R₁ ← 2R₁'],
+    finalRows: [
+      [2, -2, 4, 8],
+      [0, 2, 5, 5],
+      [0, 3, -7, -7],
+    ],
+    checkPos: [3, 3],
+    checkAnswer: -7,
+  },
+  {
+    rows: [
+      [0, 2, 4],
+      [1, -1, 3],
+      [2, 0, -2],
+    ],
+    ops: ['R₁ ↔ R₂', 'R₃ ← R₃ − 2R₁', 'R₃ ← R₃ − R₂', 'R₃ ← −(1/12)R₃'],
+    finalRows: [
+      [1, -1, 3],
+      [0, 2, 4],
+      [0, 0, 1],
+    ],
+    checkPos: [3, 3],
+    checkAnswer: 1,
+  },
+  {
+    rows: [
+      [1, 2, -1, 3],
+      [2, 3, 1, 8],
+      [-1, 0, 2, 1],
+    ],
+    augCol: 3,
+    ops: ['R₂ ← R₂ − 2R₁', 'R₃ ← R₃ + R₁', 'R₂ ↔ R₃', 'R₃ ← R₃ + R₂'],
+    finalRows: [
+      [1, 2, -1, 3],
+      [0, 2, 1, 4],
+      [0, 1, 4, 6],
+    ],
+    checkPos: [3, 2],
+    checkAnswer: 1,
+  },
+]
+
+// Bloque 4: sistema → aumentada → escalonamiento guiado → rango, pivote y libres
+export interface Taller1RankItem {
+  system: string[]
+  augRows: number[][]
+  echelonOps: string[]
+  echelonRows: number[][]
+  rank: number
+  freeCount: number
+  pivotVars: string
+  freeVars: string
+  extra?: string
+  tag: 'scd' | 'sci'
+}
+
+export const TALLER1_RANK_ITEMS: Taller1RankItem[] = [
+  {
+    system: ['x + y + z = 6', '2x − y + z = 3', 'x + 2y − z = 2'],
+    augRows: [
+      [1, 1, 1, 6],
+      [2, -1, 1, 3],
+      [1, 2, -1, 2],
+    ],
+    echelonOps: ['R₂ ← R₂ − 2R₁', 'R₃ ← R₃ − R₁', 'R₂ ↔ R₃', 'R₃ ← R₃ + 3R₂'],
+    echelonRows: [
+      [1, 1, 1, 6],
+      [0, 1, -2, -4],
+      [0, 0, -7, -21],
+    ],
+    rank: 3,
+    freeCount: 0,
+    pivotVars: 'x, y, z',
+    freeVars: '—',
+    extra: 'Solución: x=1, y=2, z=3.',
+    tag: 'scd',
+  },
+  {
+    system: ['x₁ + 2x₂ − x₃ + x₄ = 3', '2x₁ + 3x₂ + x₃ − x₄ = 5', '−x₁ − x₂ + 2x₃ + 3x₄ = 1'],
+    augRows: [
+      [1, 2, -1, 1, 3],
+      [2, 3, 1, -1, 5],
+      [-1, -1, 2, 3, 1],
+    ],
+    echelonOps: ['R₂ ← R₂ − 2R₁', 'R₃ ← R₃ + R₁', 'R₃ ← R₃ + R₂'],
+    echelonRows: [
+      [1, 2, -1, 1, 3],
+      [0, -1, 3, -3, -1],
+      [0, 0, 4, 1, 3],
+    ],
+    rank: 3,
+    freeCount: 1,
+    pivotVars: 'x₁, x₂, x₃',
+    freeVars: 'x₄',
+    tag: 'sci',
+  },
+  {
+    system: ['x + y − z = 2', '2x + 2y − 2z = 4', '3x − y + z = 4'],
+    augRows: [
+      [1, 1, -1, 2],
+      [2, 2, -2, 4],
+      [3, -1, 1, 4],
+    ],
+    echelonOps: ['R₂ ← R₂ − 2R₁', 'R₃ ← R₃ − 3R₁', 'R₂ ↔ R₃'],
+    echelonRows: [
+      [1, 1, -1, 2],
+      [0, -4, 4, -2],
+      [0, 0, 0, 0],
+    ],
+    rank: 2,
+    freeCount: 1,
+    pivotVars: 'x, y',
+    freeVars: 'z',
+    tag: 'sci',
+  },
+  {
+    system: ['x − 2y + z = 4', '−2x + 4y + z = 1'],
+    augRows: [
+      [1, -2, 1, 4],
+      [-2, 4, 1, 1],
+    ],
+    echelonOps: ['R₂ ← R₂ + 2R₁'],
+    echelonRows: [
+      [1, -2, 1, 4],
+      [0, 0, 3, 9],
+    ],
+    rank: 2,
+    freeCount: 1,
+    pivotVars: 'x, z',
+    freeVars: 'y',
+    extra: 'El pivote de la fila 2 cae en la columna 3 — no siempre avanza a la columna inmediatamente siguiente.',
+    tag: 'sci',
+  },
+]
+
+// Bloque 5: sistema → aumentada → RREF → Teorema del Rango
+export interface Taller1RrefItem {
+  system: string[]
+  augRows: number[][]
+  rrefRows: number[][]
+  classification: 'unica' | 'infinitas' | 'inconsistente'
+  explain: string
+}
+
+export const TALLER1_RREF_ITEMS: Taller1RrefItem[] = [
+  {
+    system: ['x + y − z = 1', '2x − y + z = 5', 'x + z = 5'],
+    augRows: [
+      [1, 1, -1, 1],
+      [2, -1, 1, 5],
+      [1, 0, 1, 5],
+    ],
+    rrefRows: [
+      [1, 0, 0, 2],
+      [0, 1, 0, 2],
+      [0, 0, 1, 3],
+    ],
+    classification: 'unica',
+    explain: 'rango(A) = rango([A|b]) = n = 3 → solución única: x=2, y=2, z=3.',
+  },
+  {
+    system: ['x + y − z = 1', '2x − y + z = 5', '3x = 6'],
+    augRows: [
+      [1, 1, -1, 1],
+      [2, -1, 1, 5],
+      [3, 0, 0, 6],
+    ],
+    rrefRows: [
+      [1, 0, 0, 2],
+      [0, 1, -1, -1],
+      [0, 0, 0, 0],
+    ],
+    classification: 'infinitas',
+    explain: 'rango(A) = rango([A|b]) = 2 < n = 3 → infinitas soluciones. Con z = t: x=2, y=t−1, z=t.',
+  },
+  {
+    system: ['x + y − z = 1', '2x − y + z = 5', '3x = 10'],
+    augRows: [
+      [1, 1, -1, 1],
+      [2, -1, 1, 5],
+      [3, 0, 0, 10],
+    ],
+    rrefRows: [
+      [1, 0, 0, 2],
+      [0, 1, -1, -1],
+      [0, 0, 0, 1],
+    ],
+    classification: 'inconsistente',
+    explain: 'La última fila se lee 0 = 1: rango(A) = 2 < rango([A|b]) = 3 → sistema inconsistente (sin solución).',
+  },
+]

@@ -31,8 +31,8 @@ export function Workshops({ onNavigate }: WorkshopsProps) {
             <span className="font-display text-lg text-ink">Taller de Saberes Previos y Consolidación</span>
           </div>
           <span className="text-sm leading-relaxed text-ink-muted">
-            Clasificación geométrica de sistemas, rango de una matriz, demostración del Teorema del
-            Rango, Rouché-Capelli paramétrico y un problema de flujo de tránsito urbano.
+            Matriz aumentada, tipos de matrices, operaciones elementales de fila, rango de una matriz y el
+            Teorema del Rango.
           </span>
           <span className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-pine">
             <span className="h-2 w-2 rounded-full bg-accent-green" />

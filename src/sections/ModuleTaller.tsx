@@ -1,12 +1,23 @@
 import { useState } from 'react'
 import { ModuleShell } from '@/components/app/ModuleShell'
-import { TALLER_MATRIX_M, type SectionId } from '@/data/content'
+import {
+  MATRIX_KIND_LABEL,
+  TALLER1_AUGMENTED_ITEMS,
+  TALLER1_MATRIX_CLASSIFY_ITEMS,
+  TALLER1_RANK_ITEMS,
+  TALLER1_ROWOP_SEQ,
+  TALLER1_RREF_ITEMS,
+  type MatrixKind,
+  type SectionId,
+} from '@/data/content'
 import { cn } from '@/lib/utils'
 
 interface ModuleProps {
   onNavigate: (id: SectionId) => void
   onDone: () => void
 }
+
+const KIND_OPTIONS: MatrixKind[] = ['diagonal', 'identidad', 'triSup', 'triInf', 'simetrica', 'ninguna']
 
 function NumericCheckField({
   question,
@@ -66,16 +77,89 @@ function ExerciseHeader({ n, title }: { n: number; title: string }) {
   )
 }
 
+function MatrixGrid({ rows, augCol }: { rows: number[][]; augCol?: number }) {
+  return (
+    <div className="inline-flex items-stretch gap-2 rounded bg-surface-raised p-3 font-mono-nums">
+      <div className="w-2 rounded-l border-y-2 border-l-2 border-line-strong" />
+      <div className="flex flex-col gap-1.5 py-1">
+        {rows.map((row, r) => (
+          <div key={r} className="flex items-center gap-3">
+            {row.map((v, c) => (
+              <span key={c} className="flex items-center gap-3">
+                {augCol !== undefined && c === augCol && <span className="h-4 w-px bg-line-strong" />}
+                <span className="w-6 text-center text-sm text-ink">{v}</span>
+              </span>
+            ))}
+          </div>
+        ))}
+      </div>
+      <div className="w-2 rounded-r border-y-2 border-r-2 border-line-strong" />
+    </div>
+  )
+}
+
+function SystemBlock({ lines }: { lines: string[] }) {
+  return (
+    <p className="font-mono-nums text-sm leading-relaxed text-ink">
+      {lines.map((l, i) => (
+        <span key={i}>
+          {l}
+          {i < lines.length - 1 && <br />}
+        </span>
+      ))}
+    </p>
+  )
+}
+
+function RevealButton({ open, onClick, showLabel, hideLabel }: { open: boolean; onClick: () => void; showLabel: string; hideLabel: string }) {
+  return (
+    <button
+      onClick={onClick}
+      className="rounded border border-line-strong px-3 py-1.5 text-sm font-medium text-ink transition hover:bg-surface-raised"
+    >
+      {open ? hideLabel : showLabel}
+    </button>
+  )
+}
+
 export function ModuleTaller({ onNavigate, onDone }: ModuleProps) {
   const [, setDoneFlags] = useState<Record<string, boolean>>({})
-
   const markSub = (key: string) => {
     setDoneFlags((d) => {
       const next = { ...d, [key]: true }
-      if (Object.keys(next).length >= 3) onDone()
+      if (Object.keys(next).length >= 4) onDone()
       return next
     })
   }
+
+  // Bloque 1
+  const [augRevealed, setAugRevealed] = useState<Record<number, boolean>>({})
+
+  // Bloque 2
+  const [b2Revealed, setB2Revealed] = useState<Record<number, boolean>>({})
+  const [b2Choice, setB2Choice] = useState<Record<number, MatrixKind>>({})
+  const chooseB2 = (i: number, kind: MatrixKind) => {
+    if (b2Revealed[i]) return
+    setB2Choice((c) => ({ ...c, [i]: kind }))
+    setB2Revealed((r) => {
+      const next = { ...r, [i]: true }
+      markSub('b2')
+      return next
+    })
+  }
+
+  // Bloque 3
+  const [b3Revealed, setB3Revealed] = useState<Record<number, boolean>>({})
+
+  // Bloque 4
+  const [b4Step, setB4Step] = useState<Record<number, number>>({})
+
+  // Bloque 5
+  const [b5Revealed, setB5Revealed] = useState<Record<number, boolean>>({})
+  const [b5RrefInputs, setB5RrefInputs] = useState<Record<string, string>>({})
+  const [b5RrefChecked, setB5RrefChecked] = useState<Record<number, boolean>>({})
+  const [b5Class, setB5Class] = useState<Record<number, string>>({})
+  const [b5ClassChecked, setB5ClassChecked] = useState<Record<number, boolean>>({})
 
   return (
     <ModuleShell
@@ -83,176 +167,346 @@ export function ModuleTaller({ onNavigate, onDone }: ModuleProps) {
       eyebrow="Módulo 07 · Semana 2"
       title="Taller de Saberes Previos y Consolidación"
       onNavigate={onNavigate}
-      intro="Cinco ejercicios para consolidar sistemas de ecuaciones lineales, matrices, rango, los teoremas de esta semana y una aplicación de ingeniería. Algunos ejercicios son abiertos (para resolver en tu cuaderno o discutir en clase); otros tienen verificación numérica inmediata."
+      intro="Cinco bloques de ejercicios para consolidar matrices, matriz aumentada, operaciones elementales de fila, rango y el Teorema del Rango. Los ejercicios de escritura son para tu cuaderno; las casillas numéricas verifican tu respuesta al instante."
     >
+      {/* Bloque 1 */}
       <section className="mb-14">
-        <ExerciseHeader n={1} title="Clasificación geométrica" />
-        <p className="text-sm leading-relaxed text-ink-muted">
-          Escribe un sistema lineal de tres ecuaciones con tres variables que represente cada situación:
-        </p>
-        <ul className="mt-3 flex flex-col gap-2 text-sm text-ink-muted">
-          <li className="rounded border border-line bg-surface p-3">a) Tres planos paralelos no coincidentes (sistema inconsistente).</li>
-          <li className="rounded border border-line bg-surface p-3">b) Tres planos que se intersectan en una única recta común (SCI).</li>
-          <li className="rounded border border-line bg-surface p-3">c) Tres planos que se cortan en un único punto (SCD).</li>
-        </ul>
-      </section>
-
-      <section className="mb-14">
-        <ExerciseHeader n={2} title="Rango y operaciones de renglón" />
-        <p className="mb-4 text-sm leading-relaxed text-ink-muted">
-          Considera la matriz M. Llévala a su forma escalonada por filas (REF) y luego a su forma escalonada
-          reducida (RREF).
-        </p>
-        <div className="mb-5 inline-flex items-stretch gap-2 rounded bg-surface-raised p-3 font-mono-nums">
-          <div className="w-2 rounded-l border-y-2 border-l-2 border-line-strong" />
-          <div className="flex flex-col gap-1.5 py-1">
-            {TALLER_MATRIX_M.map((row, r) => (
-              <div key={r} className="flex gap-4">
-                {row.map((v, c) => (
-                  <span key={c} className="w-6 text-center text-sm text-ink">{v}</span>
-                ))}
-              </div>
-            ))}
-          </div>
-          <div className="w-2 rounded-r border-y-2 border-r-2 border-line-strong" />
-        </div>
-        <p className="mb-4 text-sm leading-relaxed text-ink-muted">
-          Si M fuera la matriz de coeficientes de un sistema homogéneo Mx = 0 con x = [x₁, x₂, x₃, x₄]ᵀ, identifica
-          las variables pivote y libres, y escribe el conjunto solución en forma paramétrica.
-        </p>
-        <div className="flex flex-col gap-3">
-          <NumericCheckField question="¿Cuál es el rango de M?" answer={2} onCorrect={() => markSub('m-rango')} />
-          <NumericCheckField
-            question="¿Cuántas variables libres tiene el sistema homogéneo Mx = 0 (n = 4)?"
-            answer={2}
-            onCorrect={() => markSub('m-libres')}
-          />
-        </div>
-      </section>
-
-      <section className="mb-14">
-        <ExerciseHeader n={3} title="Discusión del Teorema del Rango" />
-        <p className="text-sm leading-relaxed text-ink-muted">
-          Demuestra que si un sistema lineal Ax = b es consistente y tiene más variables que ecuaciones (n &gt; m),
-          entonces el sistema obligatoriamente tiene infinitas soluciones. Usa las propiedades del rango y el
-          Teorema del Rango en tu demostración.
-        </p>
-        <p className="mt-2 text-xs text-ink-muted">
-          Pista: el rango de una matriz nunca puede superar su número de filas.
-        </p>
-      </section>
-
-      <section className="mb-14">
-        <ExerciseHeader n={4} title="Análisis paramétrico por Rouché-Capelli" />
-        <p className="mb-4 font-mono-nums text-sm leading-relaxed text-ink-muted">
-          x − 2y + 3z = 1{'\n'}2x + y + z = 2{'\n'}−3x + y + az = b
-        </p>
-        <p className="mb-4 text-sm leading-relaxed text-ink-muted">
-          Determina las condiciones sobre los parámetros a y b para que el sistema tenga: (a) solución única, (b)
-          infinitas soluciones, (c) ninguna solución.
-        </p>
-        <NumericCheckField
-          question="Para empezar: ¿para qué valor de a la matriz de coeficientes se vuelve singular (determinante = 0)?"
-          answer={-4}
-          onCorrect={() => markSub('rc-a')}
-        />
-        <p className="mt-3 text-xs text-ink-muted">
-          Con ese valor de a fijo, sigue reduciendo por filas en términos de b para encontrar la condición que separa
-          el caso (b) del caso (c).
-        </p>
-      </section>
-
-      <section>
-        <ExerciseHeader n={5} title="Flujo de tránsito urbano (modelación de redes)" />
+        <ExerciseHeader n={1} title="Escribir la matriz aumentada" />
         <p className="mb-5 text-sm leading-relaxed text-ink-muted">
-          La red muestra el flujo de vehículos (por hora) en cuatro intersecciones A, B, C y D durante la hora pico.
-          Las calles son de un solo sentido. En cada intersección, <strong>el flujo de entrada es igual al flujo de
-          salida</strong>.
+          Para cada sistema, escribe en tu cuaderno la matriz aumentada [A | b] y luego verifica con el botón.
         </p>
+        <div className="flex flex-col gap-4">
+          {TALLER1_AUGMENTED_ITEMS.map((item, i) => (
+            <div key={i} className="rounded border border-line bg-surface p-4">
+              <span className="mb-2 block text-xs font-medium uppercase tracking-wide text-ink-muted">
+                Sistema {i + 1}
+              </span>
+              <SystemBlock lines={item.system} />
+              {item.note && <p className="mt-2 text-xs text-ink-muted">{item.note}</p>}
+              <div className="mt-3 flex flex-wrap items-center gap-3">
+                <RevealButton
+                  open={!!augRevealed[i]}
+                  showLabel="Mostrar matriz aumentada"
+                  hideLabel="Ocultar"
+                  onClick={() => {
+                    setAugRevealed((r) => ({ ...r, [i]: !r[i] }))
+                    markSub(`aug-${i}`)
+                  }}
+                />
+              </div>
+              {augRevealed[i] && (
+                <div className="mt-3 animate-in fade-in">
+                  <MatrixGrid rows={item.rows} augCol={item.rows[0].length - 1} />
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </section>
 
-        <TrafficDiagram />
-
-        <p className="mt-5 mb-4 text-sm leading-relaxed text-ink-muted">
-          a) Deduce el sistema de ecuaciones lineales para el flujo en cada intersección. b) Escribe la matriz
-          aumentada y llévala a su RREF mediante Gauss-Jordan. c) Determina el rango y el número de variables
-          libres; escribe la solución general en términos de las variables libres. d) Si la calle de x₅ debe
-          cerrarse (x₅ = 0), determina los flujos restantes. ¿Es factible, considerando que todo flujo debe ser no
-          negativo?
+      {/* Bloque 2 */}
+      <section className="mb-14">
+        <ExerciseHeader n={2} title="Identificar el tipo de matriz" />
+        <p className="mb-5 text-sm leading-relaxed text-ink-muted">
+          Clasifica cada matriz como Diagonal, Identidad, Triangular Superior, Triangular Inferior, Simétrica o
+          Ninguna de las anteriores.
         </p>
+        <div className="grid gap-5 sm:grid-cols-2">
+          {TALLER1_MATRIX_CLASSIFY_ITEMS.map((item, i) => {
+            const isRevealed = b2Revealed[i]
+            return (
+              <div key={i} className="rounded border border-line bg-surface p-4">
+                <MatrixGrid rows={item.rows} />
+                <div className="mt-3 flex flex-wrap gap-1.5">
+                  {KIND_OPTIONS.map((k) => {
+                    const isChosen = b2Choice[i] === k
+                    const isCorrectKind = k === item.kind
+                    return (
+                      <button
+                        key={k}
+                        onClick={() => chooseB2(i, k)}
+                        disabled={isRevealed}
+                        className={cn(
+                          'rounded border px-2 py-1 text-xs font-medium transition',
+                          !isRevealed && 'border-line-strong text-ink hover:border-pine hover:text-pine',
+                          isRevealed && isCorrectKind && 'border-pine bg-pine/15 text-pine',
+                          isRevealed && isChosen && !isCorrectKind && 'border-danger bg-danger/10 text-danger',
+                          isRevealed && !isChosen && !isCorrectKind && 'border-line text-ink-muted opacity-50',
+                        )}
+                      >
+                        {MATRIX_KIND_LABEL[k]}
+                      </button>
+                    )
+                  })}
+                </div>
+                {isRevealed && (
+                  <p className={cn('mt-3 animate-in fade-in text-sm leading-relaxed', b2Choice[i] === item.kind ? 'text-pine' : 'text-danger')}>
+                    {b2Choice[i] === item.kind ? 'Correcto — ' : 'Incorrecto — '}
+                    {item.explain}
+                  </p>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      </section>
 
-        <NumericCheckField
-          question="Con x₅ = 0, ¿cuál es el mayor valor entero de x₄ para el cual todos los flujos siguen siendo no negativos?"
-          answer={200}
-          onCorrect={() => markSub('traffic')}
-        />
+      {/* Bloque 3 */}
+      <section className="mb-14">
+        <ExerciseHeader n={3} title="Secuencias de operaciones elementales de fila" />
+        <p className="mb-5 text-sm leading-relaxed text-ink-muted">
+          Aplica la secuencia de operaciones <strong>en el orden dado</strong> y verifica la entrada indicada del
+          resultado final.
+        </p>
+        <div className="flex flex-col gap-4">
+          {TALLER1_ROWOP_SEQ.map((item, i) => (
+            <div key={i} className="rounded border border-line bg-surface p-4">
+              <MatrixGrid rows={item.rows} augCol={item.augCol} />
+              <ol className="mt-3 flex flex-col gap-1 text-sm text-ink-muted">
+                {item.ops.map((op, k) => (
+                  <li key={k} className="font-mono-nums text-ink">
+                    {k + 1}. {op}
+                  </li>
+                ))}
+              </ol>
+              <div className="mt-3 flex flex-col gap-3">
+                <NumericCheckField
+                  question={`Verificación: valor en la posición (${item.checkPos[0]}, ${item.checkPos[1]}) de la matriz final.`}
+                  answer={item.checkAnswer}
+                  onCorrect={() => markSub(`row-${i}`)}
+                />
+                <div>
+                  <RevealButton
+                    open={!!b3Revealed[i]}
+                    showLabel="Mostrar matriz final completa"
+                    hideLabel="Ocultar"
+                    onClick={() => setB3Revealed((r) => ({ ...r, [i]: !r[i] }))}
+                  />
+                </div>
+                {b3Revealed[i] && (
+                  <div className="animate-in fade-in">
+                    <MatrixGrid rows={item.finalRows} augCol={item.augCol} />
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Bloque 4 */}
+      <section className="mb-14">
+        <ExerciseHeader n={4} title="De un sistema al rango: escalonar de forma guiada" />
+        <p className="mb-5 text-sm leading-relaxed text-ink-muted">
+          Escribe la matriz aumentada, escalónala usando las operaciones sugeridas y determina el rango, las
+          variables pivote y las variables libres.
+        </p>
+        <div className="flex flex-col gap-4">
+          {TALLER1_RANK_ITEMS.map((item, i) => {
+            const step = b4Step[i] ?? 0
+            return (
+              <div key={i} className="rounded border border-line bg-surface p-4">
+                <span
+                  className={cn(
+                    'mb-2 inline-block rounded-full border px-2 py-0.5 text-xs font-medium',
+                    item.tag === 'scd' ? 'border-pine text-pine' : 'border-warm text-warm',
+                  )}
+                >
+                  {item.tag === 'scd' ? 'rango completo' : 'variables libres'}
+                </span>
+                <SystemBlock lines={item.system} />
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <RevealButton
+                    open={step >= 1}
+                    showLabel="Paso 1 · Mostrar matriz aumentada"
+                    hideLabel="Paso 1 · Ocultar matriz aumentada"
+                    onClick={() => setB4Step((s) => ({ ...s, [i]: step >= 1 ? 0 : 1 }))}
+                  />
+                  {step >= 1 && (
+                    <RevealButton
+                      open={step >= 2}
+                      showLabel="Paso 2 · Escalonar (ver operaciones y resultado)"
+                      hideLabel="Paso 2 · Ocultar escalonamiento"
+                      onClick={() => setB4Step((s) => ({ ...s, [i]: step >= 2 ? 1 : 2 }))}
+                    />
+                  )}
+                </div>
+                {step >= 1 && (
+                  <div className="mt-3 animate-in fade-in">
+                    <MatrixGrid rows={item.augRows} augCol={item.augRows[0].length - 1} />
+                  </div>
+                )}
+                {step >= 2 && (
+                  <div className="mt-3 animate-in fade-in">
+                    <ol className="mb-2 flex flex-col gap-1 font-mono-nums text-sm text-ink-muted">
+                      {item.echelonOps.map((op, k) => (
+                        <li key={k}>
+                          {k + 1}. {op}
+                        </li>
+                      ))}
+                    </ol>
+                    <MatrixGrid rows={item.echelonRows} augCol={item.echelonRows[0].length - 1} />
+                  </div>
+                )}
+                <div className="mt-4 flex flex-col gap-3">
+                  <NumericCheckField
+                    question="¿Cuál es el rango de la matriz de coeficientes?"
+                    answer={item.rank}
+                    onCorrect={() => markSub(`rank-${i}`)}
+                  />
+                  <NumericCheckField
+                    question="¿Cuántas variables libres tiene el sistema?"
+                    answer={item.freeCount}
+                    onCorrect={() => markSub(`free-${i}`)}
+                  />
+                </div>
+                {step >= 2 && (
+                  <p className="mt-3 text-xs text-ink-muted">
+                    Variables pivote: <strong className="text-ink">{item.pivotVars}</strong> · Variables libres:{' '}
+                    <strong className="text-ink">{item.freeVars}</strong>
+                    {item.extra ? ` — ${item.extra}` : ''}
+                  </p>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      </section>
+
+      {/* Bloque 5 */}
+      <section>
+        <ExerciseHeader n={5} title="RREF y el Teorema del Rango" />
+        <p className="mb-4 text-sm leading-relaxed text-ink-muted">
+          Los tres sistemas comparten las mismas dos primeras ecuaciones — solo cambia la tercera. Escalona cada uno
+          hasta su forma escalonada <strong>reducida</strong> (RREF) y usa el Teorema del Rango para clasificarlo.
+        </p>
+        <div className="mb-6 rounded border-l-4 border-pine bg-pine/10 p-4 text-sm leading-relaxed text-ink">
+          <strong className="text-pine">Observación: </strong>
+          la forma escalonada por filas (REF) <em>no es única</em> — dos secuencias válidas de operaciones pueden
+          terminar en matrices distintas, aunque ambas sean correctas. La forma escalonada <strong>reducida</strong>{' '}
+          (RREF) sí es única para cada matriz: por eso este ejercicio pide sus valores exactos y no los de una
+          escalonada cualquiera.
+        </div>
+        <div className="flex flex-col gap-5">
+          {TALLER1_RREF_ITEMS.map((item, i) => {
+            const inputsFilled = item.rrefRows.every((row, r) =>
+              row.every((_, c) => b5RrefInputs[`${i}-${r}-${c}`] !== undefined && b5RrefInputs[`${i}-${r}-${c}`] !== ''),
+            )
+            const rrefChecked = b5RrefChecked[i]
+            const rrefCorrect =
+              rrefChecked &&
+              item.rrefRows.every((row, r) =>
+                row.every((v, c) => Math.abs(Number(b5RrefInputs[`${i}-${r}-${c}`] ?? NaN) - v) < 0.01),
+              )
+            const classChecked = b5ClassChecked[i]
+            const classCorrect = b5Class[i] === item.classification
+            return (
+              <div key={i} className="rounded border border-line bg-surface p-4">
+                <SystemBlock lines={item.system} />
+                <div className="mt-3">
+                  <RevealButton
+                    open={!!b5Revealed[i]}
+                    showLabel="Mostrar matriz aumentada"
+                    hideLabel="Ocultar"
+                    onClick={() => setB5Revealed((r) => ({ ...r, [i]: !r[i] }))}
+                  />
+                </div>
+                {b5Revealed[i] && (
+                  <div className="mt-3 animate-in fade-in">
+                    <MatrixGrid rows={item.augRows} augCol={item.augRows[0].length - 1} />
+                  </div>
+                )}
+
+                <p className="mt-4 mb-2 text-sm text-ink-muted">
+                  Ingresa los valores de la RREF, fila por fila (incluida la columna aumentada):
+                </p>
+                <div className="flex flex-col gap-1.5">
+                  {item.rrefRows.map((row, r) => (
+                    <div key={r} className="flex flex-wrap items-center gap-2">
+                      {row.map((_, c) => (
+                        <input
+                          key={c}
+                          type="number"
+                          step="any"
+                          value={b5RrefInputs[`${i}-${r}-${c}`] ?? ''}
+                          onChange={(e) =>
+                            setB5RrefInputs((s) => ({ ...s, [`${i}-${r}-${c}`]: e.target.value }))
+                          }
+                          disabled={rrefChecked}
+                          className="w-14 rounded border border-line-strong bg-surface px-2 py-1 text-center font-mono-nums text-sm text-ink outline-none focus:border-pine disabled:opacity-70"
+                        />
+                      ))}
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-2 flex flex-wrap items-center gap-3">
+                  <button
+                    onClick={() => {
+                      setB5RrefChecked((s) => ({ ...s, [i]: true }))
+                      markSub(`rref-${i}`)
+                    }}
+                    disabled={!inputsFilled || rrefChecked}
+                    className="rounded border border-line-strong px-3 py-1.5 text-sm font-medium text-ink transition hover:bg-surface-raised disabled:opacity-40"
+                  >
+                    Verificar RREF
+                  </button>
+                  {rrefChecked && (
+                    <span className={cn('text-sm font-medium', rrefCorrect ? 'text-pine' : 'text-danger')}>
+                      {rrefCorrect ? '✓ Correcto' : '✗ Revisa tus valores'}
+                    </span>
+                  )}
+                </div>
+
+                <p className="mt-4 mb-2 text-sm text-ink-muted">
+                  Según el Teorema del Rango, este sistema tiene:
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {(
+                    [
+                      { key: 'unica', label: 'Solución única' },
+                      { key: 'infinitas', label: 'Infinitas soluciones' },
+                      { key: 'inconsistente', label: 'Ninguna solución' },
+                    ] as const
+                  ).map((opt) => (
+                    <button
+                      key={opt.key}
+                      onClick={() => setB5Class((s) => ({ ...s, [i]: opt.key }))}
+                      disabled={classChecked}
+                      className={cn(
+                        'rounded border px-3 py-1.5 text-sm font-medium transition',
+                        b5Class[i] === opt.key ? 'border-pine text-pine' : 'border-line-strong text-ink hover:border-pine/50',
+                        classChecked && 'opacity-70',
+                      )}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                  <button
+                    onClick={() => {
+                      setB5ClassChecked((s) => ({ ...s, [i]: true }))
+                      if (b5Class[i] === item.classification) markSub(`class-${i}`)
+                    }}
+                    disabled={!b5Class[i] || classChecked}
+                    className="rounded border border-line-strong px-3 py-1.5 text-sm font-medium text-ink transition hover:bg-surface-raised disabled:opacity-40"
+                  >
+                    Verificar
+                  </button>
+                  {classChecked && (
+                    <span className={cn('text-sm font-medium', classCorrect ? 'text-pine' : 'text-danger')}>
+                      {classCorrect ? '✓ Correcto' : '✗ Revisa el rango de A y de [A|b]'}
+                    </span>
+                  )}
+                </div>
+                {classChecked && <p className="mt-3 text-sm leading-relaxed text-ink-muted">{item.explain}</p>}
+              </div>
+            )
+          })}
+        </div>
+        <p className="mt-5 text-xs text-ink-muted">
+          Nota: las mismas dos primeras ecuaciones definen una recta común a dos planos; la tercera ecuación decide
+          si el tercer plano corta esa recta en un punto (5.1), la contiene por completo (5.2) o la elude (5.3).
+        </p>
       </section>
     </ModuleShell>
-  )
-}
-
-function TrafficDiagram() {
-  return (
-    <div className="overflow-x-auto rounded border border-line bg-surface p-4">
-      <svg viewBox="0 0 420 240" className="mx-auto h-auto w-full max-w-xl" role="img" aria-label="Red de tránsito con intersecciones A, B, C, D">
-        <defs>
-          <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-            <path d="M0,0 L10,5 L0,10 z" fill="currentColor" />
-          </marker>
-        </defs>
-        <g className="text-ink-muted" stroke="currentColor" fill="none" strokeWidth="1.5">
-          {/* nodes */}
-          <circle cx="90" cy="60" r="22" className="text-line-strong" fill="none" />
-          <circle cx="330" cy="60" r="22" className="text-line-strong" fill="none" />
-          <circle cx="90" cy="180" r="22" className="text-line-strong" fill="none" />
-          <circle cx="330" cy="180" r="22" className="text-line-strong" fill="none" />
-        </g>
-        <g className="text-ink font-mono-nums" fontSize="15" fontWeight="700" textAnchor="middle">
-          <text x="90" y="65">A</text>
-          <text x="330" y="65">B</text>
-          <text x="90" y="185">C</text>
-          <text x="330" y="185">D</text>
-        </g>
-
-        {/* internal flows */}
-        <g className="text-pine" stroke="currentColor" strokeWidth="2" markerEnd="url(#arrow)">
-          <line x1="114" y1="60" x2="306" y2="60" />
-          <line x1="90" y1="84" x2="90" y2="156" />
-          <line x1="306" y1="180" x2="114" y2="180" />
-          <line x1="330" y1="84" x2="330" y2="156" />
-          <line x1="108" y1="164" x2="312" y2="76" />
-        </g>
-        <g className="text-pine font-mono-nums" fontSize="13" textAnchor="middle">
-          <text x="200" y="52">x₁</text>
-          <text x="72" y="122">x₂</text>
-          <text x="200" y="196">x₃</text>
-          <text x="348" y="122">x₄</text>
-          <text x="230" y="110">x₅</text>
-        </g>
-
-        {/* external inflows */}
-        <g className="text-leaf" stroke="currentColor" strokeWidth="2" markerEnd="url(#arrow)">
-          <line x1="20" y1="60" x2="66" y2="60" />
-          <line x1="90" y1="238" x2="90" y2="204" />
-        </g>
-        <g className="text-leaf font-mono-nums" fontSize="13" fontWeight="700">
-          <text x="18" y="48">500</text>
-          <text x="96" y="228">200</text>
-        </g>
-
-        {/* external outflows */}
-        <g className="text-ember" stroke="currentColor" strokeWidth="2" markerEnd="url(#arrow)">
-          <line x1="330" y1="36" x2="330" y2="4" />
-          <line x1="66" y1="180" x2="20" y2="180" />
-        </g>
-        <g className="text-ember font-mono-nums" fontSize="13" fontWeight="700">
-          <text x="336" y="16">300</text>
-          <text x="18" y="168">400</text>
-        </g>
-      </svg>
-      <p className="mt-2 text-center text-xs text-ink-muted">
-        <span className="text-leaf font-medium">500 y 200 entran</span> a la red por A y D ·{' '}
-        <span className="text-ember font-medium">300 y 400 salen</span> de la red por B y C.
-      </p>
-    </div>
   )
 }
