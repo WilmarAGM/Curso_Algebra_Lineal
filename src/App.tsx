@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { SideBar, type PageId } from '@/components/app/SideBar'
 import { MobileNav } from '@/components/app/MobileNav'
+import { PwaUpdater } from '@/components/app/PwaUpdater'
 import { Home } from '@/sections/Home'
 import { WeeksGrid } from '@/sections/WeeksGrid'
 import { SupportMaterial } from '@/sections/SupportMaterial'
@@ -98,6 +99,8 @@ function App() {
           Álgebra Lineal · Institución Universitaria Pascual Bravo · Semestre 2026-II
         </footer>
       </main>
+
+      <PwaUpdater />
     </div>
   )
 }
