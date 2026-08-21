@@ -28,6 +28,9 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ["**/*.{js,css,html,svg,png,woff2}"],
+        // Don't hijack navigations to real files (PDFs, etc.) with the SPA fallback —
+        // only app routes (no file extension) should resolve to index.html offline.
+        navigateFallbackDenylist: [/\.[a-z0-9]+$/i],
       },
     }),
   ],
