@@ -2,6 +2,7 @@ import { EVAL_SCHEDULE } from '@/data/content'
 import { Calendar } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { QRCodeSVG } from 'qrcode.react'
+import { InstallAppButton } from '@/components/app/InstallAppButton'
 
 const SITE_URL = 'https://curso-algebra-lineal.vercel.app/'
 
@@ -30,6 +31,7 @@ export function Home() {
           <span className="text-center text-xs font-medium text-ink-muted mt-1">
             Escanea para acceder<br />al sitio del curso
           </span>
+          <InstallAppButton />
         </div>
       </header>
 
